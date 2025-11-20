@@ -1,0 +1,16 @@
+## Interface: 11200
+## Title: PriestPower
+## Notes: Priest Power!
+## Author: Aftershock
+## Version: 1.0.0
+## SavedVariables: PriestPower_Assignments
+
+PriestPower_Consts.lua
+PriestPower_Utils.lua
+PriestPower_Comm.lua
+PriestPower_Roster.lua
+PriestPower_Logic.lua
+PriestPower_UI.lua
+PriestPower_StatusFrame.lua
+PriestPower.lua
+PriestPower.xml

@@ -1,0 +1,155 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+
+    <!-- Main Window -->
+    <Frame name="PriestPowerFrame" toplevel="true" movable="true" parent="UIParent" enableMouse="true" hidden="true">
+        <Size>
+            <AbsDimension x="500" y="300"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+            <BackgroundInsets>
+                <AbsInset left="11" right="12" top="12" bottom="11"/>
+            </BackgroundInsets>
+            <TileSize>
+                <AbsValue val="32"/>
+            </TileSize>
+            <EdgeSize>
+                <AbsValue val="32"/>
+            </EdgeSize>
+        </Backdrop>
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="$parentTitle" inherits="GameFontNormal" text="PriestPower Assignments">
+                    <Anchors>
+                        <Anchor point="TOP">
+                            <Offset>
+                                <AbsDimension x="0" y="-20"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-5" y="-5"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <!-- Container for rows, populated in Lua -->
+            <ScrollFrame name="$parentScrollFrame" inherits="UIPanelScrollFrameTemplate">
+                <Size>
+                    <AbsDimension x="450" y="230"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="20" y="-40"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <ScrollChild>
+                    <Frame name="$parentScrollChild">
+                        <Size>
+                            <AbsDimension x="450" y="230"/>
+                        </Size>
+                    </Frame>
+                </ScrollChild>
+            </ScrollFrame>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                PriestPower_OnLoad();
+            </OnLoad>
+            <OnEvent>
+                PriestPower_OnEvent(event);
+            </OnEvent>
+            <OnDragStart>
+                if IsControlKeyDown() then
+                    this:StartMoving();
+                end
+            </OnDragStart>
+            <OnDragStop>
+                this:StopMovingOrSizing();
+            </OnDragStop>
+        </Scripts>
+    </Frame>
+
+    <!-- Status Frame (Small Icon) -->
+    <Button name="PriestPowerStatusFrame" toplevel="true" movable="true" parent="UIParent" enableMouse="true" hidden="true">
+        <Size>
+            <AbsDimension x="44" y="44"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER">
+                <Offset>
+                    <AbsDimension x="0" y="-100"/>
+                </Offset>
+            </Anchor>
+        </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <!-- Colored background acts as border -->
+                <Texture name="$parentStatusTexture" setAllPoints="true">
+                    <Color r="1" g="0" b="0" a="1.0"/> <!-- Default Red -->
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <Texture name="$parentIconTexture">
+                    <Size>
+                        <AbsDimension x="40" y="40"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="CENTER"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <Layer level="OVERLAY">
+                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Target">
+                    <Anchors>
+                        <Anchor point="BOTTOM" relativePoint="TOP"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnLoad>
+                this:RegisterForDrag("LeftButton");
+            </OnLoad>
+            <OnClick>
+                PriestPower_StatusFrame_OnClick();
+            </OnClick>
+            <OnUpdate>
+                PriestPower_OnUpdate(arg1);
+            </OnUpdate>
+            <OnDragStart>
+                if IsControlKeyDown() then
+                    this:StartMoving();
+                end
+            </OnDragStart>
+            <OnDragStop>
+                if IsControlKeyDown() then
+                    this:StopMovingOrSizing();
+                end
+            </OnDragStop>
+            <OnEnter>
+                GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+                GameTooltip:SetText("PriestPower Status");
+                GameTooltip:AddLine("Click to cast assigned spell");
+                GameTooltip:AddLine("Ctrl+Left Click to drag");
+                GameTooltip:Show();
+            </OnEnter>
+            <OnLeave>
+                GameTooltip:Hide();
+            </OnLeave>
+        </Scripts>
+    </Button>
+</Ui>
