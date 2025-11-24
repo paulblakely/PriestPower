@@ -10,7 +10,7 @@ function PriestPower_SendMessage(msg)
 end
 
 function PriestPower_RequestSend()
-    PriestPower_SendMessage("REQ")
+    PriestPower_SendMessage("REFRESH")
 end
 
 function PriestPower_SendSelf()
@@ -36,7 +36,7 @@ end
 function PriestPower_HandleMessage(msg, sender)
     -- ChatFrame1:AddMessage("PriestPower: Received " .. msg .. " from " .. sender)
     
-    if msg == "REQ" then
+    if msg == "REFRESH" then
         PriestPower_SendSelf()
         return
     end
