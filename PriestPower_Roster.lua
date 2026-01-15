@@ -4,12 +4,14 @@ PriestPower_Roster = {}
 
 function PriestPower_ScanRaid()
     PriestPower_Roster = {}
+    local addedPriests = {}
     local numRaid = GetNumRaidMembers()    
     if numRaid > 0 then
         for i = 1, numRaid do
             local name, _, _, _, class = GetRaidRosterInfo(i)
-            if class == "PRIEST" or class == "Priest" then
+            if (class == "PRIEST" or class == "Priest") and not addedPriests[name] then
                 table.insert(PriestPower_Roster, name)
+                addedPriests[name] = true
             end
         end
     else
@@ -20,7 +22,10 @@ function PriestPower_ScanRaid()
         local _, class = UnitClass("player")
         if class == "PRIEST" then
             local playerName = UnitName("player")
-            table.insert(PriestPower_Roster, playerName)
+            if not addedPriests[playerName] then
+                table.insert(PriestPower_Roster, playerName)
+                addedPriests[playerName] = true
+            end
         end
         
         -- Check party
@@ -29,7 +34,10 @@ function PriestPower_ScanRaid()
                 local _, partyClass = UnitClass("party"..i)
                 if partyClass == "PRIEST" then
                     local partyMemberName = UnitName("party"..i)
-                    table.insert(PriestPower_Roster, partyMemberName)
+                    if not addedPriests[partyMemberName] then
+                        table.insert(PriestPower_Roster, partyMemberName)
+                        addedPriests[partyMemberName] = true
+                    end
                 end
             end
         end

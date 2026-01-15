@@ -4,6 +4,9 @@ function PriestPower_UpdateUI()
     local scrollChild = getglobal("PriestPowerFrameScrollFrameScrollChild")
     local previousFrame = nil
     
+    -- Close any open dropdowns to prevent stale data
+    CloseDropDownMenus()
+    
     -- Hide all existing rows first (simplified cleanup)
     local i = 1
     while true do
@@ -51,9 +54,20 @@ function PriestPower_UpdateUI()
                 championDropdown:SetPoint("LEFT", text, "RIGHT", -10, 0)
                 UIDropDownMenu_SetWidth(120, championDropdown)
                 frame.championDropdown = championDropdown
+                
+                -- Override the button script to open our custom frame
+                local button = getglobal(frameName.."ChampionButton")
+                if button then
+                    -- Capture priestName locally for the closure
+                    local pName = priestName 
+                    button:SetScript("OnClick", function()
+                        -- 'this' refers to the button
+                        PriestPower_OpenSelectionMenu(this:GetParent(), pName)
+                    end)
+                end
             end
             championDropdown.priestName = priestName
-            UIDropDownMenu_Initialize(championDropdown, PriestPower_ChampionDropdown_Initialize)
+            -- No initialization needed for custom frame approach
             
             -- Buff Dropdown
             local buffDropdown = getglobal(frameName.."Buff")
@@ -103,54 +117,106 @@ function PriestPower_UpdateUI()
     end
 end
 
-function PriestPower_ChampionDropdown_OnClick(arg1, arg2)
+-- Legacy function removed
+
+function PriestPower_SelectionButton_OnClick()
+    local button = this
+    local priestName = button.proposingPriest
+    local selectedChampion = button.championName
+    
     local currentBuff = nil
-    if PriestPower_Assignments[arg1] then
-        currentBuff = PriestPower_Assignments[arg1].Buff
+    if PriestPower_Assignments[priestName] then
+        currentBuff = PriestPower_Assignments[priestName].Buff
     end
-    PriestPower_SetAssignment(arg1, arg2, currentBuff)
-    CloseDropDownMenus()
+    
+    PriestPower_SetAssignment(priestName, selectedChampion, currentBuff)
+    
+    -- Update the dropdown text immediately
+    local frameIndex = 1
+    while true do
+        local frame = getglobal("PriestPowerRow"..frameIndex)
+        if not frame then break end
+        if frame.nameText:GetText() == priestName then
+             UIDropDownMenu_SetText(selectedChampion or "Select Champion", frame.championDropdown)
+             break
+        end
+        frameIndex = frameIndex + 1
+    end
+    
+    PriestPowerSelectionFrame:Hide()
 end
 
-function PriestPower_ChampionDropdown_Initialize()
-    local dropdown = getglobal(UIDROPDOWNMENU_INIT_MENU)
-    local priestName = dropdown.priestName
-    if not priestName then return end
+function PriestPower_OpenSelectionMenu(dropdownFrame, priestName)
+    local frame = PriestPowerSelectionFrame
+    local scrollChild = getglobal("PriestPowerSelectionFrameScrollFrameScrollChild")
     
-    local info = {}
-    info.func = PriestPower_ChampionDropdown_OnClick
-    info.arg1 = priestName
+    -- Clear existing buttons
+    local i = 1
+    while true do
+        local btn = getglobal("PriestPowerSelectionButton"..i)
+        if not btn then break end
+        btn:Hide()
+        i = i + 1
+    end
     
-    info.text = "None"
-    info.arg2 = nil
-    UIDropDownMenu_AddButton(info)
+    local function CreateOrGetButton(index, text, value)
+        local btnName = "PriestPowerSelectionButton"..index
+        local btn = getglobal(btnName)
+        if not btn then
+            btn = CreateFrame("Button", btnName, scrollChild)
+            btn:SetWidth(150)
+            btn:SetHeight(20)
+            
+            local fontString = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            fontString:SetPoint("LEFT", btn, "LEFT", 5, 0)
+            btn:SetFontString(fontString)
+            
+            btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+            btn:SetScript("OnClick", PriestPower_SelectionButton_OnClick)
+        end
+        
+        btn:SetText(text)
+        btn.proposingPriest = priestName
+        btn.championName = value
+        btn:Show()
+        btn:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 5, -(index-1)*20)
+        return btn
+    end
+
+    local btnIndex = 1
+    
+    -- Add "None" option
+    CreateOrGetButton(btnIndex, "None", nil)
+    btnIndex = btnIndex + 1
     
     local numRaid = GetNumRaidMembers()
     if numRaid > 0 then
         for i=1, numRaid do
             local name = GetRaidRosterInfo(i)
             if name ~= priestName then
-                info.text = name
-                info.arg2 = name
-                UIDropDownMenu_AddButton(info)
+                CreateOrGetButton(btnIndex, name, name)
+                btnIndex = btnIndex + 1
             end
         end
     else
-        if priestName ~= UnitName("player") then 
-            info.text = UnitName("player")
-            info.arg2 = UnitName("player")
-            UIDropDownMenu_AddButton(info)
+        if priestName ~= UnitName("player") then
+            CreateOrGetButton(btnIndex, UnitName("player"), UnitName("player"))
+            btnIndex = btnIndex + 1
         end
         local numParty = GetNumPartyMembers()
         for i=1, numParty do
             local name = UnitName("party"..i)
             if name ~= priestName then
-                info.text = name
-                info.arg2 = name
-                UIDropDownMenu_AddButton(info)
+                CreateOrGetButton(btnIndex, name, name)
+                btnIndex = btnIndex + 1
             end
         end
     end
+    
+    -- Update ScrollChild height so scrolling actually happens
+    scrollChild:SetHeight((btnIndex - 1) * 20)
+    
+    frame:Show()
 end
 
 function PriestPower_BuffDropdown_OnClick(arg1, arg2)

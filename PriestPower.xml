@@ -73,9 +73,7 @@
                 PriestPower_OnEvent(event);
             </OnEvent>
             <OnDragStart>
-                if IsControlKeyDown() then
-                    this:StartMoving();
-                end
+                this:StartMoving();
             </OnDragStart>
             <OnDragStop>
                 this:StopMovingOrSizing();
@@ -131,20 +129,16 @@
                 PriestPower_OnUpdate(arg1);
             </OnUpdate>
             <OnDragStart>
-                if IsControlKeyDown() then
-                    this:StartMoving();
-                end
+                this:StartMoving();
             </OnDragStart>
             <OnDragStop>
-                if IsControlKeyDown() then
-                    this:StopMovingOrSizing();
-                end
+                this:StopMovingOrSizing();
             </OnDragStop>
             <OnEnter>
                 GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
                 GameTooltip:SetText("PriestPower Status");
                 GameTooltip:AddLine("Click to cast assigned spell");
-                GameTooltip:AddLine("Ctrl+Left Click to drag");
+                GameTooltip:AddLine("Drag to move");
                 GameTooltip:Show();
             </OnEnter>
             <OnLeave>
@@ -152,4 +146,68 @@
             </OnLeave>
         </Scripts>
     </Button>
+
+    <!-- Selection Frame (Custom Scrollable Dropdown) -->
+    <Frame name="PriestPowerSelectionFrame" toplevel="true" frameStrata="DIALOG" parent="UIParent" hidden="true" enableMouse="true">
+        <Size>
+            <AbsDimension x="200" y="300"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+             <BackgroundInsets>
+                 <AbsInset left="11" right="12" top="12" bottom="11"/>
+             </BackgroundInsets>
+             <TileSize>
+                 <AbsValue val="32"/>
+             </TileSize>
+             <EdgeSize>
+                 <AbsValue val="32"/>
+             </EdgeSize>
+         </Backdrop>
+         <Layers>
+             <Layer level="ARTWORK">
+                 <FontString name="$parentTitle" inherits="GameFontNormal" text="Select Champion">
+                     <Anchors>
+                         <Anchor point="TOP">
+                             <Offset>
+                                 <AbsDimension x="0" y="-15"/>
+                             </Offset>
+                         </Anchor>
+                     </Anchors>
+                 </FontString>
+             </Layer>
+         </Layers>
+         <Frames>
+             <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
+                 <Anchors>
+                     <Anchor point="TOPRIGHT">
+                         <Offset>
+                             <AbsDimension x="-5" y="-5"/>
+                         </Offset>
+                     </Anchor>
+                 </Anchors>
+             </Button>
+             <ScrollFrame name="$parentScrollFrame" inherits="UIPanelScrollFrameTemplate">
+                 <Size>
+                     <AbsDimension x="160" y="240"/>
+                 </Size>
+                 <Anchors>
+                     <Anchor point="TOPLEFT">
+                         <Offset>
+                             <AbsDimension x="15" y="-40"/>
+                         </Offset>
+                     </Anchor>
+                 </Anchors>
+                 <ScrollChild>
+                     <Frame name="$parentScrollChild">
+                         <Size>
+                             <AbsDimension x="160" y="240"/>
+                         </Size>
+                     </Frame>
+                 </ScrollChild>
+             </ScrollFrame>
+         </Frames>
+    </Frame>
 </Ui>
